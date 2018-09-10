@@ -1,6 +1,8 @@
 import React from "react"
-import { Switch, Route } from 'react-router-dom'
+import { Switch, Route, withRouter } from 'react-router-dom'
 import Loadable from 'react-loadable'
+import { connect } from 'react-redux'
+import { history } from './history'
 
 const LoadingPage = ({isLoading, error}) => {
     if (isLoading) {
@@ -14,12 +16,12 @@ const LoadingPage = ({isLoading, error}) => {
     }
 };
 const Home = Loadable({
-	loader: () => import('./home'),
+	loader: () => import('./containers/home'),
 	loading: LoadingPage,
 	delay: 0
 })
 
-export default class App extends React.Component{
+class App extends React.Component{
 	componentDidUpdate(){
 		window.scrollTo(0, 0)
 	}
@@ -33,3 +35,11 @@ export default class App extends React.Component{
 		); 
 	}
 }
+
+const mapStateToProps = (state) => {
+	return {
+		routing: state.routing
+	}
+}
+
+export default withRouter(connect(mapStateToProps)(App))

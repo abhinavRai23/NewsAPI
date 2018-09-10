@@ -9,7 +9,6 @@ export default class Home extends React.Component {
 			username:"",
 			data: null
 		}
-		this.handleUsername = this.handleUsername.bind(this)
 		this.handleSubmit = this.handleSubmit.bind(this)
 		this.handleEnter = this.handleEnter.bind(this)
 	}
