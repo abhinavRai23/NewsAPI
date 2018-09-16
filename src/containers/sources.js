@@ -75,6 +75,9 @@ class Sources extends React.Component {
 			this.handleSubmit()
 		}
 	}
+	componentDidUpdate(){
+		Materialize.updateTextFields();
+	}
 	componentDidMount() {
 		this.getSources()
 	}
@@ -98,7 +101,7 @@ class Sources extends React.Component {
 							{
 								filters.all_countries.map((value) => {
 									return (
-										<option key={value} key={value}>{value.toUpperCase()}</option>
+										<option key={value} value={value}>{value.toUpperCase()}</option>
 									)
 								})
 							}
@@ -110,7 +113,7 @@ class Sources extends React.Component {
 							{
 								filters.all_categories.map((value) => {
 									return (
-										<option key={value} key={value}>{value.toUpperCase()}</option>
+										<option key={value} value={value}>{value.toUpperCase()}</option>
 									)
 								})
 							}
