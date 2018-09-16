@@ -12,9 +12,9 @@ export function ChooseCategory(value) {
     }
 }
 
-export function ChooseLanguage(value) {
+export function ChooseSource(value) {
     return {
-        type: "ChooseLanguage",
+        type: "ChooseSource",
         payload: value
     }
 }

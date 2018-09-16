@@ -4,18 +4,17 @@ import { Link, withRouter } from 'react-router-dom'
 import { getData } from "../components/utility";
 import { ApiKey } from "../components/global";
 import { connect } from "react-redux"
-import { ChooseCategory, ChooseLanguage, ChooseCountry, AddOptions } from "../actions/filters";
+import { ChooseCategory, ChooseCountry, AddOptions } from "../actions/filters";
 
 class Sources extends React.Component {
 	constructor(props) {
 		super(props)
-		let { selected_country, selected_category, selected_language, options } = this.props.filters
+		let { selected_country, selected_category, options } = this.props.filters
 		this.state = {
 			sources: [],
-			backup: [],
+			backup: options.all_sources,
 			selected_country: selected_country,
 			selected_category: selected_category,
-			selected_language: selected_language,
 			filters: {
 				...options
 			}
@@ -23,48 +22,47 @@ class Sources extends React.Component {
 		this.handleEnter = this.handleEnter.bind(this)
 		this.handleChanges = this.handleChanges.bind(this)
 		this.getSources = this.getSources.bind(this)
+		this.filtersSource = this.filtersSource.bind(this)
 	}
 	handleChanges(e) {
 		let name = e.target.name
 		let value = e.target.value
 		this.setState({ [name]: value })
 		let sources = this.state.backup
-		if (this.state.selected_category != "") {
-			sources = sources.filter(source => source.selected_category == this.state.selected_category.toLowerCase())
-		}
-		if (this.state.selected_language != "") {
-			sources = sources.filter(source => source.selected_language == this.state.selected_language.toLowerCase())
-		}
-		if (this.state.selected_country != "") {
-			sources = sources.filter(source => source.selected_country == this.state.selected_country.toLowerCase())
-		}
-		this.setState({ sources })
-		if(name=="selected_category"){
+		if (name == "selected_category") {
 			this.props.ChooseCategory(value)
 		}
-		else if(name=='selected_country'){
+		else if (name == 'selected_country') {
 			this.props.ChooseCountry(value)
 		}
-		else{
-			this.props.ChooseLanguage(value)
+		this.filtersSource()
+	}
+	filtersSource() {
+		let sources = this.state.backup
+		if (this.state.selected_category != "") {
+			sources = sources.filter(source => source.category == this.state.selected_category.toLowerCase())
 		}
+		if (this.state.selected_country != "") {
+			sources = sources.filter(source => source.country == this.state.selected_country.toLowerCase())
+		}
+		this.setState({ sources })
 	}
 	getSources() {
 		getData('sources?apiKey=' + ApiKey).then(data => {
 			if (data.status == 'ok') {
-				let { all_countries, all_categories, all_languages } = this.state.filters
+				var all_countries = [], all_categories = [], all_sources = []
 				data.sources.forEach(source => {
-					if (all_countries.indexOf(source.selected_country) < 0) {
-						all_countries.push(source.selected_country)
+					all_sources.push(source.id)
+					if (all_countries.indexOf(source.country) < 0) {
+						all_countries.push(source.country)
 					}
-					if (all_categories.indexOf(source.selected_category) < 0) {
-						all_categories.push(source.selected_category)
-					}
-					if (all_languages.indexOf(source.selected_language) < 0) {
-						all_languages.push(source.selected_language)
+					if (all_categories.indexOf(source.category) < 0) {
+						all_categories.push(source.category)
 					}
 				})
-				this.setState({ sources: data.sources, backup: data.sources, filters: { all_countries, all_categories, all_languages } })
+				this.setState({ sources: data.sources, backup: data.sources, filters: { all_countries, all_categories } })
+				this.props.AddOptions({ all_sources, all_categories, all_countries })
+				this.filtersSource()
 			}
 			else {
 				console.log(data)
@@ -78,12 +76,11 @@ class Sources extends React.Component {
 		}
 	}
 	componentDidMount() {
-		if (this.state.sources.length == 0) {
-			this.getSources()
-		}
+		this.getSources()
 	}
 	render() {
-		let { selected_country, selected_category, selected_language, sources, filters } = this.state
+		let { selected_country, selected_category, sources, filters } = this.state
+		console.log(filters)
 		return (
 			<div className="container">
 				<Row>
@@ -91,15 +88,15 @@ class Sources extends React.Component {
 						<h4 className="center"><u>Sources</u></h4>
 					</Col>
 				</Row>
-				{/* <Row>
-					<Col s={12} m={3}>
+				<Row>
+					<Col s={12} m={2}>
 						<h5>Filters:</h5>
 					</Col>
-					<Col s={12} m={3}>
-						<Input s={12} type='select' label="Country" name="selected_country" onChange={this.handleChanges} defaultValue={selected_country}>
+					<Col s={12} m={5}>
+						<Input s={12} type='select' label="Country" name="selected_country" onChange={this.handleChanges} value={selected_country}>
 							<option value="" disabled>Choose</option>
 							{
-								filters.all_countries.length>0 && filters.all_countries.map((value) => {
+								filters.all_countries.map((value) => {
 									return (
 										<option key={value} key={value}>{value.toUpperCase()}</option>
 									)
@@ -107,8 +104,8 @@ class Sources extends React.Component {
 							}
 						</Input>
 					</Col>
-					<Col s={12} m={3}>
-						<Input s={12} type='select' label="Category" name="selected_category" onChange={this.handleChanges} defaultValue={selected_category}>
+					<Col s={12} m={5}>
+						<Input s={12} type='select' label="Category" name="selected_category" onChange={this.handleChanges} value={selected_category}>
 							<option value="" disabled>Choose</option>
 							{
 								filters.all_categories.map((value) => {
@@ -119,24 +116,12 @@ class Sources extends React.Component {
 							}
 						</Input>
 					</Col>
-					<Col s={12} m={3}>
-						<Input s={12} type='select' label="Language" name="selected_language" onChange={this.handleChanges} defaultValue={selected_language}>
-							<option value="" disabled>Choose</option>
-							{
-								filters.all_languages.map((value) => {
-									return (
-										<option key={value} key={value}>{value.toUpperCase()}</option>
-									)
-								})
-							}
-						</Input>
-					</Col>
-				</Row> */}
+				</Row>
 				<Row className='flex'>
 					{
 						sources.map((source, index) => {
 							return (
-								<Col s={2} m={3} key={index} className='source-list'>
+								<Col s={12} m={3} key={index} className='source-list'>
 									<Link to={'/' + source.id}>{source.name}</Link>
 								</Col>
 							)
@@ -162,9 +147,6 @@ const mapDispatchToProps = (dispatch) => {
 	return {
 		ChooseCategory: (value) => {
 			dispatch(ChooseCategory(value))
-		},
-		ChooseLanguage: (value) => {
-			dispatch(ChooseLanguage(value))
 		},
 		ChooseCountry: (value) => {
 			dispatch(ChooseCountry(value))
